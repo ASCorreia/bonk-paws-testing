@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "airdrop": "ts-node ./helper/airdrop.ts",
+    "keygen": "ts-node ./helper/keygen.ts",
+    "nftImage": "ts-node ./helper/nft_image.ts",
+    "nftMetadata": "ts-node ./helper/nft_metadat.ts"
+  },
+  "dependencies": {
+    "@metaplex-foundation/mpl-token-metadata": "^3.1.2",
+    "@project-serum/anchor": "^0.26.0",
+    "@solana/spl-token": "^0.3.11",
+    "@solana/web3.js": "^1.89.0",
+    "@types/node": "^20.11.1",
+    "bs58": "^5.0.0",
+    "typescript": "^5.3.3"
+  }
+}
