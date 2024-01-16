@@ -1,4 +1,4 @@
-import { Connection, Keypair, PublicKey, VersionedTransaction, SystemProgram, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction, TransactionInstruction, AddressLookupTableAccount, TransactionMessage } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, VersionedTransaction, SystemProgram, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction, TransactionInstruction, AddressLookupTableAccount, TransactionMessage, Ed25519Program } from '@solana/web3.js';
 import { IDL, BonkForPaws } from '../programs/bonkForPaws';
 import { Program, Wallet, AnchorProvider, Address, BN } from "@project-serum/anchor"
 import {Key, MPL_TOKEN_METADATA_PROGRAM_ID} from '@metaplex-foundation/mpl-token-metadata';
@@ -85,10 +85,10 @@ const addressLookupTableAccounts: AddressLookupTableAccount[] = [];
     const charity = new Keypair().publicKey;
 
     const wsol = new PublicKey("So11111111111111111111111111111111111111112")
-    const donorWsol = await getAssociatedTokenAddressSync(donor.publicKey, wsol);
+    const donorWsol = getAssociatedTokenAddressSync(donor.publicKey, wsol);
     const bonk = new PublicKey("DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263")
-    const donorBonk = await getAssociatedTokenAddressSync(donor.publicKey, bonk);
-    const authorityBonk = await getAssociatedTokenAddressSync(authority.publicKey, bonk);
+    const donorBonk = getAssociatedTokenAddressSync(donor.publicKey, bonk);
+    const authorityBonk = getAssociatedTokenAddressSync(authority.publicKey, bonk);
 
     let amountDonated = 10
 
@@ -97,8 +97,10 @@ const addressLookupTableAccounts: AddressLookupTableAccount[] = [];
 
     let minAmount = new BN(quoteResponse.outAmount);
 
-    // @ASCPool => do this
-    // const signatureIx...
+    const signatureIx = Ed25519Program.createInstructionWithPrivateKey({
+      privateKey: donor.secretKey, // @Leo, ping me to sync + double check the signing authority
+      message: charity.toBuffer(), // This can be replaced by the ID (Program to be changed accordingly)
+    });
 
     let donationState = PublicKey.findProgramAddressSync([Buffer.from('donation_state')], program.programId)[0];
 
@@ -170,7 +172,7 @@ const addressLookupTableAccounts: AddressLookupTableAccount[] = [];
         payerKey: donor.publicKey,
         recentBlockhash: blockhash,
         instructions: [
-            // signatureIx
+            signatureIx,
             donateIx,
             deserializeInstruction(swapInstructionPayload),
             finalizeIx
