@@ -99,7 +99,7 @@ const addressLookupTableAccounts: AddressLookupTableAccount[] = [];
 
     const signatureIx = Ed25519Program.createInstructionWithPrivateKey({
       privateKey: donor.secretKey, // @Leo, ping me to sync + double check the signing authority
-      message: charity.toBuffer(), // This can be replaced by the ID (Program to be changed accordingly)
+      message: Buffer.concat([charity.toBuffer(), id.toBuffer()]), // This can be replaced by the ID / key only (Program to be changed accordingly)
     });
 
     let donationState = PublicKey.findProgramAddressSync([Buffer.from('donation_state')], program.programId)[0];
