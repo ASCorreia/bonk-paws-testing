@@ -11,86 +11,6 @@ export type BonkForPaws = {
           "isSigner": true
         },
         {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "charity",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "bonk",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "donorBonk",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "authorityBonk",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "wsol",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "donorWsol",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "donationState",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "instructions",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "bonkAmountIn",
-          "type": "u64"
-        },
-        {
-          "name": "minLamportsOut",
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "donateSol",
-      "accounts": [
-        {
-          "name": "donor",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "charity",
           "isMut": false,
           "isSigner": false
@@ -98,13 +18,36 @@ export type BonkForPaws = {
         {
           "name": "donationState",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "donation_state"
+              }
+            ]
+          }
         },
         {
           "name": "matchDonationState",
           "isMut": true,
           "isSigner": false,
-          "isOptional": true
+          "isOptional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "match_donation"
+              },
+              {
+                "kind": "arg",
+                "type": "u64",
+                "path": "seed"
+              }
+            ]
+          }
         },
         {
           "name": "instructions",
@@ -125,15 +68,11 @@ export type BonkForPaws = {
         {
           "name": "solDonation",
           "type": "u64"
-        },
-        {
-          "name": "id",
-          "type": "u64"
         }
       ]
     },
     {
-      "name": "matchSol",
+      "name": "matchDonation",
       "accounts": [
         {
           "name": "authority",
@@ -168,12 +107,36 @@ export type BonkForPaws = {
         {
           "name": "donationState",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "donation_state"
+              }
+            ]
+          }
         },
         {
           "name": "matchDonationState",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "match_donation"
+              },
+              {
+                "kind": "account",
+                "type": "u64",
+                "account": "MatchDonationState",
+                "path": "match_donation_state.seed"
+              }
+            ]
+          }
         },
         {
           "name": "instructions",
@@ -198,17 +161,13 @@ export type BonkForPaws = {
       ],
       "args": [
         {
-          "name": "seeds",
-          "type": "u64"
-        },
-        {
           "name": "bonkDonation",
           "type": "u64"
         }
       ]
     },
     {
-      "name": "finalize",
+      "name": "finalizeDonation",
       "accounts": [
         {
           "name": "donor",
@@ -262,21 +221,21 @@ export type BonkForPaws = {
         "fields": [
           {
             "name": "bonkBurned",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "bonkDonated",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "bonkMatched",
-            "type": "u128"
+            "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "MatchDonation",
+      "name": "MatchDonationState",
       "type": {
         "kind": "struct",
         "fields": [
@@ -285,7 +244,15 @@ export type BonkForPaws = {
             "type": "u64"
           },
           {
-            "name": "amount",
+            "name": "donationAmount",
+            "type": "u64"
+          },
+          {
+            "name": "matchKey",
+            "type": "publicKey"
+          },
+          {
+            "name": "seed",
             "type": "u64"
           }
         ]
@@ -592,113 +559,128 @@ export type BonkForPaws = {
   "errors": [
     {
       "code": 6000,
+      "name": "Overflow",
+      "msg": "Overflow"
+    },
+    {
+      "code": 6001,
       "name": "InvalidAmount",
       "msg": "Invalid amount"
     },
     {
-      "code": 6001,
+      "code": 6002,
       "name": "MissingSwapIx",
       "msg": "Swap IX not found"
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "MissingFinalizeIx",
       "msg": "Finalize IX not found"
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "MissingDonateIx",
       "msg": "Donate IX not found"
     },
     {
-      "code": 6004,
+      "code": 6005,
       "name": "ProgramMismatch",
       "msg": "Invalid Program ID"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "InvalidInstruction",
       "msg": "Invalid instruction"
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "InvalidRoute",
       "msg": "Invalid number of routes"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "InvalidSlippage",
       "msg": "Invalid slippage"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "InvalidSolanaAmount",
       "msg": "Invalid Solana amount"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "InvalidBonkMint",
       "msg": "Invalid BONK mint address"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "InvalidBonkAccount",
       "msg": "Invalid BONK account"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "InvalidBonkATA",
       "msg": "Invalid BONK ATA"
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "InvalidwSolMint",
       "msg": "Invalid wSOL mint address"
     },
     {
-      "code": 6013,
+      "code": 6014,
       "name": "InvalidwSolATA",
       "msg": "Invalid wSOL ATA"
     },
     {
-      "code": 6014,
+      "code": 6015,
       "name": "InvalidwSolAccount",
       "msg": "Invalid wSOL account"
     },
     {
-      "code": 6015,
+      "code": 6016,
       "name": "InvalidwSolBalance",
       "msg": "Invalid wSOL balance"
     },
     {
-      "code": 6016,
+      "code": 6017,
       "name": "InvalidCharityAddress",
       "msg": "Invalid charity address"
     },
     {
-      "code": 6017,
+      "code": 6018,
+      "name": "InvalidCharityId",
+      "msg": "Invalid charity Id"
+    },
+    {
+      "code": 6019,
       "name": "InvalidLamportsBalance",
       "msg": "Invalid lamports balance"
     },
     {
-      "code": 6018,
+      "code": 6020,
       "name": "InvalidInstructionIndex",
       "msg": "Invalid instruction index"
     },
     {
-      "code": 6019,
+      "code": 6021,
       "name": "SignatureHeaderMismatch",
       "msg": "Signature header mismatch"
     },
     {
-      "code": 6020,
+      "code": 6022,
       "name": "SignatureAuthorityMismatch",
       "msg": "Signature authority mismatch"
     },
     {
-      "code": 6021,
+      "code": 6023,
       "name": "NotMatchingDonation",
       "msg": "Not enough SOL Donated to Match"
+    },
+    {
+      "code": 6024,
+      "name": "InvalidMatchKey",
+      "msg": "Invalid Match Key"
     }
   ]
 }
@@ -716,86 +698,6 @@ export const IDL: BonkForPaws = {
           "isSigner": true
         },
         {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "charity",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "bonk",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "donorBonk",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "authorityBonk",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "wsol",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "donorWsol",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "donationState",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "instructions",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "bonkAmountIn",
-          "type": "u64"
-        },
-        {
-          "name": "minLamportsOut",
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "donateSol",
-      "accounts": [
-        {
-          "name": "donor",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "charity",
           "isMut": false,
           "isSigner": false
@@ -803,13 +705,36 @@ export const IDL: BonkForPaws = {
         {
           "name": "donationState",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "donation_state"
+              }
+            ]
+          }
         },
         {
           "name": "matchDonationState",
           "isMut": true,
           "isSigner": false,
-          "isOptional": true
+          "isOptional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "match_donation"
+              },
+              {
+                "kind": "arg",
+                "type": "u64",
+                "path": "seed"
+              }
+            ]
+          }
         },
         {
           "name": "instructions",
@@ -830,15 +755,11 @@ export const IDL: BonkForPaws = {
         {
           "name": "solDonation",
           "type": "u64"
-        },
-        {
-          "name": "id",
-          "type": "u64"
         }
       ]
     },
     {
-      "name": "matchSol",
+      "name": "matchDonation",
       "accounts": [
         {
           "name": "authority",
@@ -873,12 +794,36 @@ export const IDL: BonkForPaws = {
         {
           "name": "donationState",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "donation_state"
+              }
+            ]
+          }
         },
         {
           "name": "matchDonationState",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "match_donation"
+              },
+              {
+                "kind": "account",
+                "type": "u64",
+                "account": "MatchDonationState",
+                "path": "match_donation_state.seed"
+              }
+            ]
+          }
         },
         {
           "name": "instructions",
@@ -903,17 +848,13 @@ export const IDL: BonkForPaws = {
       ],
       "args": [
         {
-          "name": "seeds",
-          "type": "u64"
-        },
-        {
           "name": "bonkDonation",
           "type": "u64"
         }
       ]
     },
     {
-      "name": "finalize",
+      "name": "finalizeDonation",
       "accounts": [
         {
           "name": "donor",
@@ -967,21 +908,21 @@ export const IDL: BonkForPaws = {
         "fields": [
           {
             "name": "bonkBurned",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "bonkDonated",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "bonkMatched",
-            "type": "u128"
+            "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "MatchDonation",
+      "name": "MatchDonationState",
       "type": {
         "kind": "struct",
         "fields": [
@@ -990,7 +931,15 @@ export const IDL: BonkForPaws = {
             "type": "u64"
           },
           {
-            "name": "amount",
+            "name": "donationAmount",
+            "type": "u64"
+          },
+          {
+            "name": "matchKey",
+            "type": "publicKey"
+          },
+          {
+            "name": "seed",
             "type": "u64"
           }
         ]
@@ -1297,113 +1246,128 @@ export const IDL: BonkForPaws = {
   "errors": [
     {
       "code": 6000,
+      "name": "Overflow",
+      "msg": "Overflow"
+    },
+    {
+      "code": 6001,
       "name": "InvalidAmount",
       "msg": "Invalid amount"
     },
     {
-      "code": 6001,
+      "code": 6002,
       "name": "MissingSwapIx",
       "msg": "Swap IX not found"
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "MissingFinalizeIx",
       "msg": "Finalize IX not found"
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "MissingDonateIx",
       "msg": "Donate IX not found"
     },
     {
-      "code": 6004,
+      "code": 6005,
       "name": "ProgramMismatch",
       "msg": "Invalid Program ID"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "InvalidInstruction",
       "msg": "Invalid instruction"
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "InvalidRoute",
       "msg": "Invalid number of routes"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "InvalidSlippage",
       "msg": "Invalid slippage"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "InvalidSolanaAmount",
       "msg": "Invalid Solana amount"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "InvalidBonkMint",
       "msg": "Invalid BONK mint address"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "InvalidBonkAccount",
       "msg": "Invalid BONK account"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "InvalidBonkATA",
       "msg": "Invalid BONK ATA"
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "InvalidwSolMint",
       "msg": "Invalid wSOL mint address"
     },
     {
-      "code": 6013,
+      "code": 6014,
       "name": "InvalidwSolATA",
       "msg": "Invalid wSOL ATA"
     },
     {
-      "code": 6014,
+      "code": 6015,
       "name": "InvalidwSolAccount",
       "msg": "Invalid wSOL account"
     },
     {
-      "code": 6015,
+      "code": 6016,
       "name": "InvalidwSolBalance",
       "msg": "Invalid wSOL balance"
     },
     {
-      "code": 6016,
+      "code": 6017,
       "name": "InvalidCharityAddress",
       "msg": "Invalid charity address"
     },
     {
-      "code": 6017,
+      "code": 6018,
+      "name": "InvalidCharityId",
+      "msg": "Invalid charity Id"
+    },
+    {
+      "code": 6019,
       "name": "InvalidLamportsBalance",
       "msg": "Invalid lamports balance"
     },
     {
-      "code": 6018,
+      "code": 6020,
       "name": "InvalidInstructionIndex",
       "msg": "Invalid instruction index"
     },
     {
-      "code": 6019,
+      "code": 6021,
       "name": "SignatureHeaderMismatch",
       "msg": "Signature header mismatch"
     },
     {
-      "code": 6020,
+      "code": 6022,
       "name": "SignatureAuthorityMismatch",
       "msg": "Signature authority mismatch"
     },
     {
-      "code": 6021,
+      "code": 6023,
       "name": "NotMatchingDonation",
       "msg": "Not enough SOL Donated to Match"
+    },
+    {
+      "code": 6024,
+      "name": "InvalidMatchKey",
+      "msg": "Invalid Match Key"
     }
   ]
 }
